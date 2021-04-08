@@ -116,7 +116,7 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 }
 
 static void get_result(void){
-	int fOp, sOp, result;
+	int32_t fOp, sOp, result;
 
 	kstrtoint(firstOperand, 10, &fOp);
 	kstrtoint(secondOperand, 10, &sOp);

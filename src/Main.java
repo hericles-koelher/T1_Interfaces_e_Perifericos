@@ -29,6 +29,9 @@ public class Main {
                 System.out.println(expr);
 
                 // TODO: Verificar se os números são realmente 32 bits...
+                int fOp = Integer.parseInt(expr.firstOperand);
+                int s0p = Integer.parseInt(expr.secondOperand);
+                
                 // TODO: Fazer o acesso ao driver e passar a expressão...
 
                 // Pra testar a concorrencia da pra pedir uma confirmação aqui,
@@ -39,6 +42,8 @@ public class Main {
                 flag = false;
             } catch (ParseCancellationException e){
                 System.out.println("Incorrect input!");
+            } catch (NumberFormatException e){
+                System.out.println("Wrong input format");
             } catch (Exception e){
                 System.out.println("Failed to read input!");
                 break;
