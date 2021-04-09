@@ -12,6 +12,8 @@
 
 bool is_operation(const char c);
 
+bool is_buffer_clear(void)
+
 int main(void){
 
 	int first_operand = 0;
@@ -20,40 +22,35 @@ int main(void){
 	char expression[DEFAULT_SIZE] = {0};
 	char result[DEFAULT_SIZE] = {0};
 
-	bool flag = false;
+	bool success = false;
 
 	// Leitura da entrada...
-	while(!flag){
+	while(!success){
+		char term;
+
 		printf("Informe o primeiro operando\n");
 		scanf("%d", &first_operand);
-		//fflush(stdin);
-
-//		if(!isnumber(first_operand)){
-//			printf("Entrada incorreta!\n");
-//			continue;
-//		}
+		if(!is_buffer_clear()){
+			printf("Entrada incorreta!\n");
+			continue;
+		}
 
 		printf("Informe uma operação\n");
-		scanf("%c", &op);
-		//fflush(stdin);
-
-		if(!is_operation(op)){
+		scanf(" %c", &op);
+		if(!is_operation(op) || !is_buffer_clear()){
 			printf("Entrada incorreta!\n");
 			continue;
 		}
 
 		printf("Informe o segundo operando\n");
-        scanf("%d", &second_operand);
-		//fflush(stdin);
+		scanf(" %d", &second_operand);
+		if(!is_buffer_clear()){
+			printf("Entrada incorreta!\n");
+			continue;
+		}
 
-//        if(!isnumber(second_operand)){
-//        	printf("Entrada incorreta!\n");
-//        	continue;
-//        }
-
-        flag = true;
+		success = true;
 	}
-
 	sprintf(expression, "%d%c%d", first_operand, op, second_operand);
 
 	int mycalc = open("/dev/mycalc",O_RDWR);
@@ -85,10 +82,17 @@ int main(void){
 	return 0;
 }
 
+bool is_buffer_clear() {
+  int isClear = true;
+    while ((getchar()) != '\n') {
+        isClear = false; // denuncia se houve caracter não esperado
+    };
+    return isClear;
+}
+
 bool is_operation(const char c){
 	if(c == '+' || c == '-' || c == '*' || c == '/'){
 		return true;
 	}
-
 	return false;
 }

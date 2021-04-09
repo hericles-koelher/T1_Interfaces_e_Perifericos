@@ -31,3 +31,4 @@ driver_src/*.mod*
 driver_src/*.o*
 *.order*
 *.symvers*
+.DS_Store
