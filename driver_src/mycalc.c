@@ -113,7 +113,7 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 
     if (error_count==0){                // if true then have success
         printk(KERN_INFO "MyCalc: Sent %ld characters to the user\n", strlen(result_string));
-        return 0;  // clear the position to the start and return 0
+        return 0;
     }
     else {
         printk(KERN_INFO "MyCalc: Failed to send %d characters to the user\n", error_count);
