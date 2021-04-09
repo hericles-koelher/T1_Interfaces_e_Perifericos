@@ -38,20 +38,13 @@ public class Main {
 
                 myCalcWriter.close();
 
-//                var myCalcReader = new BufferedReader(new FileReader("/dev/mycalc"));
-//
-//                String result = myCalcReader.readLine();
-//
-//                myCalcReader.close();
-//
-//                System.out.println("Este é o resultado: " + result);
+                var myCalcReader = new BufferedReader(new FileReader("/dev/mycalc"));
 
-                var myCalcReader = new FileInputStream("/dev/mycalc");
+                String result = myCalcReader.readLine();
 
-                int c;
-                while ((c = myCalcReader.read()) != -1){
-                    System.out.println(c);
-                }
+                myCalcReader.close();
+
+                System.out.println("Este é o resultado: " + result);
 
                 flag = false;
             } catch (ParseCancellationException e){
