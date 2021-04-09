@@ -5,6 +5,10 @@ import Arithmetic.ArithmeticLexer;
 import Arithmetic.ArithmeticParser;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.FileReader;
+
 public class Main {
     public static void main(String[] args) {
 
@@ -28,8 +32,27 @@ public class Main {
                 var expr = getExpression(expressionContext);
                 System.out.println(expr);
 
-                // TODO: Verificar se os números são realmente 32 bits...
-                // TODO: Fazer o acesso ao driver e passar a expressão...
+                // Verificar se os números são realmente 32 bits
+                int fOp = Integer.parseInt(expr.firstOperand);
+                int s0p = Integer.parseInt(expr.secondOperand);
+                
+                // Faz o acesso ao driver e passa a expressão
+                File mycalc = new File("/dev/mycalc");
+                
+                FileWriter fw = new FileWriter(mycalc);
+
+                fw.write(expr.toString());
+                fw.close(); 
+
+                FileReader fr = new FileReader(mycalc);
+
+                int i;
+                //Leitura
+                while((i=fr.read())!=-1)    
+                    System.out.print((char)i);
+
+                fr.close();
+
 
                 // Pra testar a concorrencia da pra pedir uma confirmação aqui,
                 // tipo pedir pra pressionar enter
@@ -39,6 +62,8 @@ public class Main {
                 flag = false;
             } catch (ParseCancellationException e){
                 System.out.println("Incorrect input!");
+            } catch (NumberFormatException e){
+                System.out.println("Wrong input format");
             } catch (Exception e){
                 System.out.println("Failed to read input!");
                 break;
