@@ -16,11 +16,12 @@ MODULE_LICENSE("GPL");              // The license type -- this affects availabl
 MODULE_DESCRIPTION("A simple Linux char driver calculator module");  // The description -- see modinfo
 MODULE_VERSION("0.1");              // A version number to inform users
 
-#define STR_INT32 12
+#define STR_INT32 12	// Max size of a string for a 32 bit integer
+						// space for '\0' already included
 
-static int		majorNumber;					// Stores the device number -- determined automatically
-static char		expression_string[256] = {0};	// Memory for the string that is passed from userspace
-static char		result_string[STR_INT32] = {0};	// Memory for the string that is passed to userspace
+static int		majorNumber;							// Stores the device number -- determined automatically
+static char		expression_string[STR_INT32 * 2] = {0};	// Memory for the string that is passed from userspace
+static char		result_string[STR_INT32] = {0};			// Memory for the string that is passed to userspace
 static char		firstOperand[STR_INT32] = {0};
 static char		secondOperand[STR_INT32] = {0};
 static char		op;
@@ -29,7 +30,7 @@ static struct	device* myCalcDevice = NULL;	// The device-driver device struct po
 
 static 	DEFINE_MUTEX(myCalcMutex);
 
-static void get_result(void);
+static int get_result(void);
 static void set_data(void);
 
 static int		dev_open(struct inode *, struct file *);
@@ -101,8 +102,13 @@ static int dev_open(struct inode *inodep, struct file *filep){
 
 static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *offset){
     int error_count = 0;
-    // copy_to_user has the format ( * to, *from, size) and returns 0 on success
-    get_result();
+
+    if(get_result() == -1){
+    	printk(KERN_INFO "MyCalc: Error\n");
+ 		return -EIO; // Input error
+    }
+
+	// copy_to_user has the format ( * to, *from, size) and returns 0 on success
     error_count = copy_to_user(buffer, result_string, strlen(result_string));
 
     if (error_count==0){                // if true then have success
@@ -115,7 +121,7 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
     }
 }
 
-static void get_result(void){
+static int get_result(void){
 	int32_t fOp, sOp, result;
 
 	kstrtoint(firstOperand, 10, &fOp);
@@ -134,41 +140,56 @@ static void get_result(void){
 		case '/':
            	result = fOp / sOp;
            	break;
+        default:
+        	return -1;
 	}
 
 	sprintf(result_string, "%d", result);
+	printk(KERN_INFO "MyCalc: Result %d\n", result);
+	return 0;
 }
 
 static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, loff_t *offset){
-    strcpy(expression_string, buffer);
-	set_data();
+	int error_count = 0;
 
-    printk(KERN_INFO "MyCalc: Received %zu characters from the user\n", len);
-    return len;
+	error_count = copy_from_user(expression_string, buffer, len);
+
+	if (error_count==0){                // if true then have success
+		printk(KERN_INFO "MyCalc: Received %ld characters from the user\n", len);
+		set_data();
+        return len;
+    }
+    else {
+    	printk(KERN_INFO "MyCalc: Failed to receive %d characters from the user\n", error_count);
+        return -EFAULT;               // Failed -- return a bad address expression_string (i.e. -14)
+    }
 }
 
 static void set_data(void){
-	int i = 0;
+	int index_expr = 0, index_operand = 0;
 
-	// The first char may be a signal or digit.
-	// If it's a signal it will cause some trouble
-	// with the for loop...
-	firstOperand[i] = expression_string[i];
+	// Get the first operand from the expression
+	firstOperand[index_operand] = expression_string[index_expr];
 
-	for(; isdigit(expression_string[i]); i++){
-		firstOperand[i] = expression_string[i];
+	for(; isdigit(expression_string[index_expr]); index_expr++, index_operand++){
+		firstOperand[index_operand] = expression_string[index_expr];
 	}
 
-	firstOperand[i]='\0';
-	op = expression_string[i++];
+	firstOperand[index_operand]='\0';
 
-	for(; expression_string[i]!='\0'; i++){
-		secondOperand[i] = expression_string[i];
+	// Get the signal from the expression
+	op = expression_string[index_expr++];
+
+	index_operand = 0;
+
+	// Get the second operand from the expression
+	for(; expression_string[index_expr]!='\0'; index_expr++, index_operand++){
+		secondOperand[index_operand] = expression_string[index_expr];
 	}
 
-    secondOperand[i]='\0';
+    secondOperand[index_operand]='\0';
 
-	printk(KERN_INFO "Expression: %s %c %s\n", firstOperand, op, secondOperand);
+	printk(KERN_INFO "MyCalc: Expression %s %c %s\n", firstOperand, op, secondOperand);
 }
 
 static int dev_release(struct inode *inodep, struct file *filep){

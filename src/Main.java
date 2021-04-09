@@ -1,13 +1,8 @@
 import org.antlr.v4.runtime.*;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import java.io.*;
 import Arithmetic.ArithmeticLexer;
 import Arithmetic.ArithmeticParser;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.FileReader;
 
 public class Main {
     public static void main(String[] args) {
@@ -26,45 +21,45 @@ public class Main {
                 parser.removeErrorListeners();
                 parser.setErrorHandler(new BailErrorStrategy());
 
-                // Código de teste
-                var expressionContext = parser.expression();
-
-                var expr = getExpression(expressionContext);
-                System.out.println(expr);
+                Expression expr = getExpression(parser.expression());
 
                 // Verificar se os números são realmente 32 bits
                 int fOp = Integer.parseInt(expr.firstOperand);
                 int s0p = Integer.parseInt(expr.secondOperand);
                 
                 // Faz o acesso ao driver e passa a expressão
-                File mycalc = new File("/dev/mycalc");
-                
-                FileWriter fw = new FileWriter(mycalc);
+                var myCalcWriter = new BufferedWriter(new FileWriter("/dev/mycalc"));
 
-                fw.write(expr.toString());
-                fw.close(); 
-
-                FileReader fr = new FileReader(mycalc);
-
-                int i;
-                //Leitura
-                while((i=fr.read())!=-1)    
-                    System.out.print((char)i);
-
-                fr.close();
-
+                myCalcWriter.write(expr.toString());
 
                 // Pra testar a concorrencia da pra pedir uma confirmação aqui,
                 // tipo pedir pra pressionar enter
                 // e dps abrir outra instancia do programa.
 
-                // A alteração dessa flag deve ser sempre a ultima feita
+                myCalcWriter.close();
+
+//                var myCalcReader = new BufferedReader(new FileReader("/dev/mycalc"));
+//
+//                String result = myCalcReader.readLine();
+//
+//                myCalcReader.close();
+//
+//                System.out.println("Este é o resultado: " + result);
+
+                var myCalcReader = new FileInputStream("/dev/mycalc");
+
+                int c;
+                while ((c = myCalcReader.read()) != -1){
+                    System.out.println(c);
+                }
+
                 flag = false;
             } catch (ParseCancellationException e){
                 System.out.println("Incorrect input!");
             } catch (NumberFormatException e){
                 System.out.println("Wrong input format");
             } catch (Exception e){
+                e.printStackTrace();
                 System.out.println("Failed to read input!");
                 break;
             }
