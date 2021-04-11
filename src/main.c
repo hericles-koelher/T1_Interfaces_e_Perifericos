@@ -7,20 +7,19 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#define DEFAULT_SIZE 256 // arbitrario
-#define OPERAND_SIZE 32	// arbitrario
+#define EXPR_SIZE 64 // arbitrario
+#define NUMBER_SIZE 32	// arbitrario
 
+bool is_number(const char *str);
 bool is_operation(const char c);
-
-bool is_buffer_clear(void)
 
 int main(void){
 
-	int first_operand = 0;
+	char first_operand[NUMBER_SIZE] = {0};
 	char op = 0;
-	int second_operand = 0;
-	char expression[DEFAULT_SIZE] = {0};
-	char result[DEFAULT_SIZE] = {0};
+	char second_operand[NUMBER_SIZE] = {0};
+	char expression[EXPR_SIZE] = {0};
+	char result[NUMBER_SIZE] = {0};
 
 	bool success = false;
 
@@ -29,65 +28,47 @@ int main(void){
 		char term;
 
 		printf("Informe o primeiro operando\n");
-		scanf("%d", &first_operand);
-		if(!is_buffer_clear()){
+		scanf("%s", first_operand);
+		if(!is_number(first_operand)){
 			printf("Entrada incorreta!\n");
 			continue;
 		}
 
 		printf("Informe uma operação\n");
 		scanf(" %c", &op);
-		if(!is_operation(op) || !is_buffer_clear()){
+		// WTF scanf, pq sem o espaço antes do %c tu fica de palhaçada...
+		if(!is_operation(op)){
 			printf("Entrada incorreta!\n");
 			continue;
 		}
 
 		printf("Informe o segundo operando\n");
-		scanf(" %d", &second_operand);
-		if(!is_buffer_clear()){
+		scanf("%s", second_operand);
+		if(!is_number(second_operand)){
 			printf("Entrada incorreta!\n");
 			continue;
 		}
 
 		success = true;
 	}
-	sprintf(expression, "%d%c%d", first_operand, op, second_operand);
+	sprintf(expression, "%s%c%s", first_operand, op, second_operand);
 
 	int mycalc = open("/dev/mycalc",O_RDWR);
 
 	if(mycalc >= 0){
 		printf("Escrevendo dados...");
 		write(mycalc, expression, strlen(expression));
-		printf("Dados escritos...");
+		printf("Dados escritos...\n");
 
 		printf("Lendo dados...");
-        read(mycalc, result, DEFAULT_SIZE);
+        read(mycalc, result, NUMBER_SIZE);
         printf("Resultado = %s\n", result);
 	}else{
 		printf("Erro na abertura do arquivo\n");
-		//TODO: qual macro de erro de i/o?
-		return -1;
+		return -EIO;
 	}
 
-//	if((mycalc = open("/dev/mycalc",O_RDWR)) < 0){
-//    	printf("Lendo dados...");
-//    	read(mycalc, result, DEFAULT_SIZE);
-//    	printf("Resultado = %s\n", result);
-//   	}else{
-//    	printf("Erro na abertura do arquivo\n");
-//    	//TODO: qual macro de erro de i/o?
-//   		return -1;
-//   	}
-
 	return 0;
-}
-
-bool is_buffer_clear() {
-  int isClear = true;
-    while ((getchar()) != '\n') {
-        isClear = false; // denuncia se houve caracter não esperado
-    };
-    return isClear;
 }
 
 bool is_operation(const char c){
@@ -95,4 +76,25 @@ bool is_operation(const char c){
 		return true;
 	}
 	return false;
+}
+
+bool is_number(const char *str){
+	int i = 0;
+
+	if(strlen(str) > 1){
+		if(isdigit(str[0]) || str[0] == '+' || str[0] == '-'){
+			i++;
+		}else{
+			return false;
+		}
+	}else{
+		return isdigit(str[0]);
+	}
+
+	for(; str[i] != '\0'; i++){
+		if(!isdigit(str[i]))
+			return false;
+	}
+
+	return true;
 }
