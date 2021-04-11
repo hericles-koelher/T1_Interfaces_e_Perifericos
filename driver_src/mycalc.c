@@ -152,6 +152,12 @@ static int get_result(void){
 static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, loff_t *offset){
 	int error_count = 0;
 
+	// Reset
+    memset(firstOperand, 0, STR_INT32);
+    op = 0;
+    memset(secondOperand, 0, STR_INT32);
+    memset(expression_string, 0, STR_INT32 * 2);
+
 	error_count = copy_from_user(expression_string, buffer, len);
 
 	if (error_count==0){                // if true then have success

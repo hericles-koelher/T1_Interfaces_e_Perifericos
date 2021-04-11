@@ -17,3 +17,9 @@ clean:
 
 run:
 	./src/Main
+
+install:
+	insmod driver_src/mycalc.ko
+
+uninstall:
+	rmmod mycalc
