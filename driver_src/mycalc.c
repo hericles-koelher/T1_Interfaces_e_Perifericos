@@ -169,7 +169,7 @@ static void set_data(void){
 	int index_expr = 0, index_operand = 0;
 
 	// Get the first operand from the expression
-	firstOperand[index_operand] = expression_string[index_expr];
+	firstOperand[index_operand++] = expression_string[index_expr++];
 
 	for(; isdigit(expression_string[index_expr]); index_expr++, index_operand++){
 		firstOperand[index_operand] = expression_string[index_expr];
@@ -189,7 +189,9 @@ static void set_data(void){
 
     secondOperand[index_operand]='\0';
 
-	printk(KERN_INFO "MyCalc: Expression %s %c %s\n", firstOperand, op, secondOperand);
+	printk(KERN_INFO "MyCalc: First Operand = %s\n", firstOperand);
+	printk(KERN_INFO "MyCalc: Operation = %c\n", op);
+	printk(KERN_INFO "MyCalc: Second Operand = %s\n", secondOperand);
 }
 
 static int dev_release(struct inode *inodep, struct file *filep){
