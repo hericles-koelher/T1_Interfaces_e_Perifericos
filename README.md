@@ -14,7 +14,9 @@ implementar um driver, sob o formato de um Loadable Kernel Module (LKM) para o S
 
 ## Instalação & execução:
 ### Compilar o driver e o programa testador:
-''' sudo make '''
+'''
+sudo make
+'''
 
 #### Compilar somente o driver:
 ''' sudo make Driver '''
