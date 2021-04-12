@@ -14,24 +14,22 @@ implementar um driver, sob o formato de um Loadable Kernel Module (LKM) para o S
 
 ## Instalação & execução:
 ### Compilar o driver e o programa testador:
-'''
-sudo make
-'''
+``` sudo make ```
 
 #### Compilar somente o driver:
-''' sudo make Driver '''
+``` sudo make Driver ```
 
 #### Compilar somente o programa testador:
-''' sudo make Main '''
+``` sudo make Main ```
 
 ### Carregar o driver no kernel:
-''' sudo make install '''
+``` sudo make install ```
 
 ### Executar o programa de teste:
-''' sudo make run '''
+``` sudo make run ```
 
 ### Desinstalar o driver:
-''' sudo make uninstall '''
+``` sudo make uninstall ```
 
 ### Limpar (apagar) os arquivos gerados:
-''' sudo make clean '''
+``` sudo make clean ```
