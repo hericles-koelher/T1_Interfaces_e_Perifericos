@@ -13,62 +13,56 @@
 
 #define EXPR_SIZE (INT32_SIZE*2) 		// cabem exatamente 2 inteiros e uma operação
 
-bool is_int32(const char *str);
+void clear_buffer(void);
+bool is_int32(const long int);
 bool is_operation(const char c);
+bool was_buffer_clean(void);
+bool safe_scan_int32(int *);
 
 int main(void){
-
-	char first_operand[INT32_SIZE] = {0};
-	char op = 0;
-	char second_operand[INT32_SIZE] = {0};
+	int first_operand;
+	char operation;
+	int second_operand;
 	char expression[EXPR_SIZE] = {0};
-	char result[INT32_SIZE] = {0};
+	char result[INT32_SIZE * 2] = {0};
 
 	bool success = false;
+	int scanned = 0;
 
 	printf("Olá, durante a utilização do programa\n");
 	printf("informe números no intervalo [%d, %d].\n", INT_MIN, INT_MAX);
-	printf("O não cumprimento desta regra implica em resultado incorreto!\n\n");
+	printf("O não cumprimento desta regra implica em resultado inconsistente!\n\n");
 
 	// Leitura da entrada...
 	while(!success){
-		char term;
-
 		printf("Informe o primeiro operando\n");
-		scanf("%s", first_operand);
-		if(!is_int32(first_operand)){
-			printf("Entrada incorreta!\n");
-			continue;
-		}
+
+		if(!safe_scan_int32(&first_operand)) continue;
 
 		printf("Informe uma operação\n");
-		scanf(" %c", &op);
-		// WTF scanf, pq sem o espaço antes do %c tu fica de palhaçada...
-		if(!is_operation(op)){
+		scanned = scanf("%c", &operation);
+		if(!was_buffer_clean() || !scanned || !is_operation(operation)){
 			printf("Entrada incorreta!\n");
 			continue;
 		}
 
 		printf("Informe o segundo operando\n");
-		scanf("%s", second_operand);
-		if(!is_int32(second_operand)){
-			printf("Entrada incorreta!\n");
-			continue;
-		}
+		if(!safe_scan_int32(&second_operand)) continue;
 
 		success = true;
 	}
-	sprintf(expression, "%s%c%s", first_operand, op, second_operand);
+
+	sprintf(expression, "%d%c%d", first_operand, operation, second_operand);
 
 	int mycalc = open("/dev/mycalc",O_RDWR);
 
 	if(mycalc >= 0){
 		printf("Escrevendo dados...");
 		write(mycalc, expression, strlen(expression));
-		printf("Dados escritos...\n");
+		printf(" Dados escritos...\n");
 
 		printf("Lendo dados...");
-        read(mycalc, result, INT32_SIZE);
+        read(mycalc, result, INT32_SIZE*2);
         printf("Resultado = %s\n", result);
 	}else{
 		printf("Erro na abertura do arquivo\n");
@@ -78,41 +72,32 @@ int main(void){
 	return 0;
 }
 
-bool is_operation(const char c){
-	if(c == '+' || c == '-' || c == '*' || c == '/'){
-		return true;
-	}
-	return false;
+
+bool  was_buffer_clean() {
+	bool was_clean = true;
+	char c;
+    while ((c = getchar()) != '\n' && c != EOF) {
+    	// Entra no while quando encontra um char não esperado
+    	was_clean = false;
+    };
+    return was_clean;
 }
 
-bool is_int32(const char *str){
-	int i = 0;
+bool is_operation(const char c){
+	return c == '+' || c == '-' || c == '*' || c == '/';
+}
 
-	// O primeiro caractere pode ser um sinal (- ou +)
-	// então é melhor verificar nessa parte
-	if(strlen(str) > 1){
-		if(isdigit(str[0]) || str[0] == '+' || str[0] == '-'){
-			i++;
-		}else{
-			return false;
-		}
-	}else{
-		return isdigit(str[0]);
-	}
+bool is_int32(const long int entry){
+	return entry >= INT_MIN && entry <= INT_MAX;
+}
 
-	// Verificando se tem algo que não seja um digito
-	// no resto da string.
-	for(; str[i] != '\0'; i++){
-		if(!isdigit(str[i]))
-			return false;
-	}
-
-	// Verificando se o número está no
-	// range de inteiros de 32 bits
-	long int test = atol(str);
-
-	if(test >= INT_MIN && test >= INT_MAX)
-		return true;
-	else
+bool safe_scan_int32(int *entry){
+	long int entry_aux;
+	int scanned = scanf("%ld", &entry_aux);
+	if(!was_buffer_clean() || !scanned || !is_int32(entry_aux)){
+		printf("Entrada incorreta!\n");
 		return false;
+	}
+	*entry = (int)entry_aux;
+	return true;
 }

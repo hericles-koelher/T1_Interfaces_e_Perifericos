@@ -21,7 +21,7 @@ MODULE_VERSION("0.1");              // A version number to inform users
 
 static int		majorNumber;							// Stores the device number -- determined automatically
 static char		expression_string[STR_INT32 * 2] = {0};	// Memory for the string that is passed from userspace
-static char		result_string[STR_INT32] = {0};			// Memory for the string that is passed to userspace
+static char		result_string[STR_INT32 * 2] = {0};			// Memory for the string that is passed to userspace
 static char		firstOperand[STR_INT32] = {0};
 static char		secondOperand[STR_INT32] = {0};
 static char		op;
@@ -122,10 +122,11 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 }
 
 static int get_result(void){
-	int32_t fOp, sOp, result;
+	// int32_t fOp, sOp;
+    long long result, fOp, sOp;
 
-	kstrtoint(firstOperand, 10, &fOp);
-	kstrtoint(secondOperand, 10, &sOp);
+	kstrtoll(firstOperand, 10, &fOp);
+	kstrtoll(secondOperand, 10, &sOp);
 
 	switch(op){
 		case '+':
@@ -144,8 +145,8 @@ static int get_result(void){
         	return -1;
 	}
 
-	sprintf(result_string, "%d", result);
-	printk(KERN_INFO "MyCalc: Result %d\n", result);
+	sprintf(result_string, "%lli", result);
+	printk(KERN_INFO "MyCalc: Result %lli\n", result);
 	return 0;
 }
 
