@@ -13,7 +13,6 @@
 
 #define EXPR_SIZE (INT32_SIZE*2) 		// cabem exatamente 2 inteiros e uma operação
 
-void clear_buffer(void);
 bool is_int32(const long int);
 bool is_operation(const char c);
 bool was_buffer_clean(void);

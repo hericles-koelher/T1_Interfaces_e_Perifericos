@@ -2,7 +2,7 @@
 all: Main Driver
 
 Main:
-	gcc -o src/Main src/main.c
+	gcc -o user_src/Main user_src/main.c
 
 # Definição de coisas do driver
 obj-m := driver_src/mycalc.o
@@ -12,11 +12,11 @@ Driver:
 	make -C /lib/modules/$(shell uname -r)/build M=$(shell pwd) modules
 
 clean:
-	rm src/Main
+	rm user_src/Main
 	make -C /lib/modules/$(shell uname -r)/build M=$(shell pwd) clean
 
 run:
-	./src/Main
+	./user_src/Main
 
 install:
 	insmod driver_src/mycalc.ko
