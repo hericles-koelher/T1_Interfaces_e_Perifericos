@@ -48,6 +48,11 @@ int main(void){
 		printf("Informe o segundo operando\n");
 		if(!safe_scan_int32(&second_operand)) continue;
 
+		if(operation == '/' && second_operand == 0){
+			printf("Divisão por zero não é permitido!\n");
+			continue;
+		}
+
 		success = true;
 	}
 
